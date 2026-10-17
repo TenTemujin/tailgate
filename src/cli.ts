@@ -10,6 +10,9 @@ import { run } from './ui.js';
 import { isCompiled, uninstallSelf } from './setup.js';
 import { available, selfUpdate, startup, updateAllPlugins } from './update.js';
 import { VERSION } from './version.js';
+import { startGui } from './web.js';
+import { conflicts, listInstalled } from './core.js';
+import { apply, loadProfiles, plan } from './profiles.js';
 
 const program = new Command('tailgate').description('Skills & plugins manager for Claude Code, focused on token savings');
 
@@ -39,6 +42,29 @@ program.command('update').description('update Tailgate itself (--check only repo
 
 program.command('update-plugins').description('update every installed Claude Code plugin').action(() =>
   updateAllPlugins().forEach((x) => console.log(`${x.skipped ? 'skip  ' : x.ok ? 'ok    ' : 'FAILED'} ${x.id}  ${x.out}`)));
+
+program.command('gui').description('open the clickable interface in your browser').option('--no-open', 'do not launch the browser').action((o) => startGui(o.open));
+
+const profile = program.command('profile').description('switch between plugin sets (minimal, balanced, max-savings, yours)');
+profile.command('list').action(() => loadProfiles().forEach((p) => console.log(`${bold(p.name.padEnd(14))} ${dim(p.description)}
+${' '.repeat(15)}${p.repos.join(', ')}`)));
+profile.command('apply <name>').option('-y, --yes', 'actually apply (default is a dry run)').action(async (name, o) => {
+  const prof = loadProfiles().find((p) => p.name === name);
+  if (!prof) { console.error(`Unknown profile. Try: ${loadProfiles().map((p) => p.name).join(', ')}`); process.exitCode = 1; return; }
+  const cat = load();
+  const steps = plan(prof, cat, await listInstalled(cat));
+  if (!steps.length) return console.log('Already matches this profile.');
+  steps.forEach((s) => console.log(`${s.action.padEnd(8)} ${s.plugin}  ${dim(s.reason)}`));
+  if (!o.yes) return console.log(dim('Dry run. Add --yes to apply.'));
+  const res = apply(steps, cat);
+  res.forEach((r) => console.log(`${r.ok ? 'ok    ' : 'FAILED'} ${r.step.action} ${r.step.plugin}`));
+  process.exitCode = res.every((r) => r.ok) ? 0 : 1;
+});
+
+program.command('conflicts').description('warn about installed plugins that overlap').action(async () => {
+  const c = conflicts(await listInstalled(load()));
+  console.log(c.length ? c.map((x) => `! ${x.message}`).join(String.fromCharCode(10)) : 'No conflicts.');
+});
 
 program.command('self-uninstall').description('remove Tailgate (PATH, shortcuts, binary)').action(uninstallSelf);
 

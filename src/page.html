@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tailgate</title>
+<style>
+:root{--bg:#0b0e14;--panel:#121722;--panel2:#171d2b;--line:#222a3b;--text:#e6eaf2;--dim:#8b95a9;--teal:#00dcbe;--violet:#965aff;--green:#3ddc84;--yellow:#ffc857;--red:#ff6b6b;--grad:linear-gradient(90deg,#00dcbe,#965aff)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,Segoe UI,Roboto,sans-serif}
+header{display:flex;align-items:center;gap:16px;padding:16px 28px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(11,14,20,.92);backdrop-filter:blur(8px);z-index:5;flex-wrap:wrap}
+.logo{font-weight:800;font-size:22px;letter-spacing:.5px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ver{color:var(--dim);font-size:12px}
+.spacer{flex:1}
+.pill{padding:5px 12px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-size:12px;color:var(--dim)}
+.pill b{color:var(--text)}
+main{max-width:1180px;margin:0 auto;padding:22px 28px 60px}
+nav{display:flex;gap:6px;margin-bottom:18px}
+nav button{background:none;border:0;color:var(--dim);padding:9px 16px;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600}
+nav button.on{background:var(--panel2);color:var(--text);box-shadow:inset 0 -2px 0 var(--teal)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+input[type=search]{flex:1;min-width:220px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;color:var(--text);font-size:14px;outline:none}
+input[type=search]:focus{border-color:var(--teal)}
+.chip{padding:7px 13px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--dim);cursor:pointer;font-size:13px}
+.chip.on{border-color:var(--teal);color:var(--teal)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:border-color .15s,transform .15s}
+.card:hover{border-color:#34405a;transform:translateY(-1px)}
+.row1{display:flex;align-items:center;gap:8px}
+.name{font-weight:700;font-size:15px;color:var(--text);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.name:hover{color:var(--teal)}
+.tier{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px}
+.tier.S{background:rgba(150,90,255,.18);color:#b794ff}.tier.A{background:rgba(61,220,132,.15);color:var(--green)}.tier.B{background:rgba(255,200,87,.15);color:var(--yellow)}
+.desc{color:var(--dim);font-size:13px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:58px}
+.meta{display:flex;gap:12px;align-items:center;color:var(--dim);font-size:12px;flex-wrap:wrap}
+.score{display:flex;align-items:center;gap:7px}
+.track{width:70px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.fill{height:100%;background:var(--grad)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--panel2);color:var(--dim)}
+.tag.good{color:var(--green)}.tag.cur{color:#b794ff}
+.foot{display:flex;gap:8px;margin-top:auto}
+button.btn{border:0;border-radius:9px;padding:8px 16px;font-weight:700;cursor:pointer;font-size:13px;color:#06201b;background:var(--grad)}
+button.btn:hover{filter:brightness(1.1)}
+button.btn:disabled{opacity:.5;cursor:wait}
+button.ghost{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+button.danger{background:rgba(255,107,107,.12);color:var(--red);border:1px solid rgba(255,107,107,.3)}
+.ok{color:var(--green);font-weight:700;padding:8px 4px}
+.list{display:flex;flex-direction:column;gap:8px}
+.irow{display:grid;grid-template-columns:54px 1fr 150px 200px;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.irow .t{font-weight:700}.irow .s{color:var(--dim);font-size:12px}
+.sw{width:44px;height:24px;border-radius:12px;background:var(--line);position:relative;cursor:pointer;border:0}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+.sw.on{background:var(--teal)}.sw.on::after{left:23px}
+.cost{font-variant-numeric:tabular-nums;font-size:13px}
+.cost .track{width:100%;margin-top:4px}
+.warn{background:rgba(255,200,87,.1);border:1px solid rgba(255,200,87,.35);color:var(--yellow);padding:11px 16px;border-radius:11px;margin-bottom:12px;font-size:13px}
+.upd{background:rgba(0,220,190,.1);border:1px solid rgba(0,220,190,.35);color:var(--teal);padding:11px 16px;border-radius:11px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.pcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.pcard h3{margin:0;font-size:17px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:20}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;width:min(560px,92vw);max-height:80vh;overflow:auto}
+.step{padding:7px 0;border-bottom:1px solid var(--line);font-size:13px;display:flex;gap:10px}
+.step b{width:70px}.step .a-install{color:var(--green)}.step .a-enable{color:var(--teal)}.step .a-disable{color:var(--yellow)}
+#toast{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:8px;z-index:30}
+.t{background:var(--panel2);border:1px solid var(--line);padding:11px 16px;border-radius:10px;max-width:420px;font-size:13px}
+.t.err{border-color:var(--red);color:var(--red)}.t.good{border-color:var(--green)}
+.empty{color:var(--dim);padding:40px;text-align:center}
+@media(max-width:760px){.irow{grid-template-columns:54px 1fr}.irow>:nth-child(n+3){grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">tailgate</span><span class="ver" id="ver"></span>
+  <span class="spacer"></span>
+  <span class="pill">Always-on: <b id="tot">...</b> tokens/session</span>
+  <button class="btn ghost" id="refresh">Refresh catalog</button>
+</header>
+<main>
+  <div id="banners"></div>
+  <nav id="tabs">
+    <button data-t="discover" class="on">Discover</button>
+    <button data-t="installed">Installed</button>
+    <button data-t="profiles">Profiles</button>
+  </nav>
+  <section id="discover">
+    <div class="bar">
+      <input type="search" id="q" placeholder="Search name or description">
+      <span class="chip on" data-f="all">All</span>
+      <span class="chip" data-f="savers">Token savers</span>
+      <span class="chip" data-f="new">Not installed</span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+  <section id="installed" hidden></section>
+  <section id="profiles" hidden></section>
+</main>
+<div id="toast"></div>
+<script>
+(function(){
+var TOKEN = new URLSearchParams(location.search).get('t') || '';
+var S = {tab:'discover', filter:'all', q:'', data:null};
+var $ = function(s){return document.querySelector(s)};
+function el(tag, props, kids){
+  var e = document.createElement(tag);
+  for (var k in (props||{})) {
+    if (k === 'text') e.textContent = props[k];
+    else if (k === 'class') e.className = props[k];
+    else if (k.slice(0,2) === 'on') e.addEventListener(k.slice(2), props[k]);
+    else e.setAttribute(k, props[k]);
+  }
+  (kids||[]).forEach(function(c){ if (c) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+  return e;
+}
+function api(path, body){
+  return fetch('/api/'+path, {
+    method: body ? 'POST' : 'GET',
+    headers: {'x-tg-token': TOKEN, 'content-type':'application/json'},
+    body: body ? JSON.stringify(body) : undefined
+  }).then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j.error||r.statusText); return j; }); });
+}
+function toast(msg, kind){
+  var t = el('div', {class:'t '+(kind||''), text:msg});
+  $('#toast').appendChild(t);
+  setTimeout(function(){ t.remove(); }, kind==='err' ? 8000 : 4000);
+}
+function fmt(n){ return n == null ? 'n/a' : n.toLocaleString(); }
+function stars(n){ return n >= 1000 ? (n/1000).toFixed(1)+'k' : String(n); }
+
+function busy(btn, fn){
+  var old = btn.textContent; btn.disabled = true; btn.textContent = '...';
+  return fn().then(function(){ btn.disabled=false; btn.textContent=old; },
+                   function(e){ btn.disabled=false; btn.textContent=old; toast(e.message,'err'); });
+}
+
+function load(){
+  return api('state').then(function(d){ S.data = d; render(); }).catch(function(e){ toast(e.message,'err'); });
+}
+
+function render(){
+  var d = S.data; if(!d) return;
+  $('#ver').textContent = 'v'+d.version;
+  $('#tot').textContent = fmt(d.totalTokens);
+  var b = $('#banners'); b.textContent='';
+  if (d.update) {
+    var u = el('div',{class:'upd'},[el('span',{text:'Tailgate v'+d.update.version+' is available.'}),
+      el('button',{class:'btn',text:'Update now',onclick:function(ev){ busy(ev.target,function(){
+        return api('selfupdate',{}).then(function(){ toast('Updated. Reopen Tailgate.','good'); });}); }})]);
+    b.appendChild(u);
+  }
+  d.conflicts.forEach(function(c){ b.appendChild(el('div',{class:'warn',text:'Conflict: '+c.message})); });
+  if (S.tab==='discover') renderDiscover();
+  if (S.tab==='installed') renderInstalled();
+  if (S.tab==='profiles') renderProfiles();
+}
+
+function renderDiscover(){
+  var d = S.data, g = $('#grid'); g.textContent='';
+  var q = S.q.toLowerCase();
+  var items = d.catalog.filter(function(e){
+    if (S.filter==='savers' && !e.tokenSaver) return false;
+    if (S.filter==='new' && e.installed) return false;
+    return !q || (e.id+' '+e.description+' '+e.category).toLowerCase().indexOf(q) >= 0;
+  });
+  if (!items.length) { g.appendChild(el('div',{class:'empty',text:'No matches.'})); return; }
+  items.forEach(function(e){
+    var foot = el('div',{class:'foot'});
+    if (e.installed) foot.appendChild(el('span',{class:'ok',text:'✓ Installed'}));
+    else if (e.kind === 'unknown') foot.appendChild(el('a',{href:'https://github.com/'+e.id,target:'_blank',rel:'noopener'},[el('button',{class:'btn ghost',text:'Manual install (open repo)'})]));
+    else foot.appendChild(el('button',{class:'btn',text:'Install',onclick:function(ev){ busy(ev.target,function(){
+      return api('install',{id:e.id}).then(function(){ toast('Installed '+e.id+'. Restart Claude Code.','good'); return load(); }); }); }}));
+    var tags = el('div',{class:'tags'},[
+      e.curated ? el('span',{class:'tag cur',text:'curated'}) : null,
+      el('span',{class:'tag '+(e.tokenSaver?'good':''),text:e.category}),
+      el('span',{class:'tag',text:e.kind==='marketplace'?'plugin':e.kind})]);
+    g.appendChild(el('div',{class:'card'},[
+      el('div',{class:'row1'},[el('span',{class:'tier '+e.tier,text:e.tier}),
+        el('a',{class:'name',href:'https://github.com/'+e.id,target:'_blank',rel:'noopener',text:e.id})]),
+      el('div',{class:'desc',text:e.description}),
+      el('div',{class:'meta'},[
+        el('span',{class:'score'},[el('span',{class:'track'},[el('div',{class:'fill',style:'width:'+e.score+'%'})]),el('span',{text:String(e.score)})]),
+        el('span',{text:'★ '+stars(e.stars)}), el('span',{text:e.license||'no license'})]),
+      tags, foot]));
+  });
+}
+
+function renderInstalled(){
+  var d = S.data, s = $('#installed'); s.textContent='';
+  var head = el('div',{class:'bar'},[el('b',{text:d.installed.length+' plugins'}),el('span',{class:'spacer'}),
+    el('button',{class:'btn ghost',text:'Update all',onclick:function(ev){ busy(ev.target,function(){
+      return api('update-all',{}).then(function(r){ toast('Checked '+r.results.length+' plugins. Restart Claude Code to apply.','good'); return load(); }); }); }})]);
+  s.appendChild(head);
+  var max = Math.max.apply(null, d.installed.map(function(r){ return r.tokens||0; }).concat([1]));
+  var list = el('div',{class:'list'});
+  d.installed.slice().sort(function(a,b){ return (b.tokens||0)-(a.tokens||0); }).forEach(function(r){
+    var sw = el('button',{class:'sw'+(r.enabled?' on':''),title:r.enabled?'Disable':'Enable',onclick:function(ev){ busy(ev.target,function(){
+      return api('plugin',{id:r.id,verb:r.enabled?'disable':'enable'}).then(function(){ toast((r.enabled?'Disabled ':'Enabled ')+r.id,'good'); return load(); }); }); }});
+    var heavy = (r.tokens||0) > 10000;
+    list.appendChild(el('div',{class:'irow'},[
+      sw,
+      el('div',{},[el('div',{class:'t',text:r.id}),el('div',{class:'s',text:'v'+r.version+' · '+r.scope})]),
+      el('div',{class:'cost'},[el('span',{text:r.tokens==null?'n/a':'~'+fmt(r.tokens)+' tok',style:heavy?'color:var(--yellow)':''}),
+        el('div',{class:'track'},[el('div',{class:'fill',style:'width:'+Math.round(((r.tokens||0)/max)*100)+'%'})])]),
+      el('div',{class:'foot'},[
+        el('button',{class:'btn ghost',text:'Update',onclick:function(ev){ busy(ev.target,function(){
+          return api('plugin',{id:r.id,verb:'update'}).then(function(j){ toast(j.out||'done','good'); }); }); }}),
+        el('button',{class:'btn danger',text:'Remove',onclick:function(ev){ if(!confirm('Uninstall '+r.id+'?')) return; busy(ev.target,function(){
+          return api('plugin',{id:r.id,verb:'uninstall'}).then(function(){ toast('Removed '+r.id,'good'); return load(); }); }); }})])]));
+  });
+  s.appendChild(list);
+}
+
+function showPlan(p){
+  api('profile-plan',{name:p.name}).then(function(r){
+    var box = el('div',{class:'box'},[el('h3',{text:'Apply "'+p.name+'"'})]);
+    if (!r.steps.length) box.appendChild(el('div',{class:'empty',text:'Already matches this profile. Nothing to do.'}));
+    r.steps.forEach(function(st){
+      box.appendChild(el('div',{class:'step'},[el('b',{class:'a-'+st.action,text:st.action}),el('span',{text:st.plugin+' - '+st.reason})]));
+    });
+    var close = function(){ m.remove(); };
+    var foot = el('div',{class:'foot',style:'margin-top:16px'},[el('button',{class:'btn ghost',text:'Cancel',onclick:close})]);
+    if (r.steps.length) foot.appendChild(el('button',{class:'btn',text:'Apply',onclick:function(ev){ busy(ev.target,function(){
+      return api('profile-apply',{name:p.name}).then(function(a){
+        var bad = a.results.filter(function(x){return !x.ok;});
+        toast(bad.length ? bad.length+' step(s) failed' : 'Profile applied. Restart Claude Code.', bad.length?'err':'good'); close(); return load(); }); }); }}));
+    box.appendChild(foot);
+    var m = el('div',{class:'modal',onclick:function(e){ if(e.target===m) close(); }},[box]);
+    document.body.appendChild(m);
+  }).catch(function(e){ toast(e.message,'err'); });
+}
+
+function renderProfiles(){
+  var s = $('#profiles'); s.textContent='';
+  var g = el('div',{class:'grid'});
+  S.data.profiles.forEach(function(p){
+    g.appendChild(el('div',{class:'pcard'},[
+      el('h3',{text:p.name}),el('div',{class:'desc',text:p.description}),
+      el('div',{class:'tags'},p.repos.map(function(r){ return el('span',{class:'tag',text:r}); })),
+      el('div',{class:'foot'},[el('button',{class:'btn',text:'Preview & apply',onclick:function(){ showPlan(p); }})])]));
+  });
+  var nm = el('input',{type:'search',placeholder:'Save current setup as...'});
+  s.appendChild(g);
+  s.appendChild(el('div',{class:'bar',style:'margin-top:18px'},[nm,el('button',{class:'btn ghost',text:'Save current',onclick:function(ev){
+    if(!nm.value.trim()) return; busy(ev.target,function(){ return api('profile-save',{name:nm.value.trim()}).then(function(){ toast('Saved','good'); return load(); }); }); }})]));
+}
+
+$('#tabs').addEventListener('click', function(e){
+  var t = e.target.getAttribute('data-t'); if(!t) return;
+  S.tab = t;
+  document.querySelectorAll('#tabs button').forEach(function(b){ b.classList.toggle('on', b===e.target); });
+  ['discover','installed','profiles'].forEach(function(x){ $('#'+x).hidden = x!==t; });
+  render();
+});
+document.querySelectorAll('.chip').forEach(function(c){ c.addEventListener('click', function(){
+  document.querySelectorAll('.chip').forEach(function(x){ x.classList.remove('on'); });
+  c.classList.add('on'); S.filter = c.getAttribute('data-f'); render(); }); });
+$('#q').addEventListener('input', function(e){ S.q = e.target.value; renderDiscover(); });
+$('#refresh').addEventListener('click', function(ev){ busy(ev.target,function(){
+  return api('refresh',{}).then(function(r){ toast('Catalog: '+r.count+' entries ('+r.source+')','good'); return load(); }); }); });
+
+setInterval(function(){ api('ping').catch(function(){}); }, 5000);
+api('ping').catch(function(){});
+load();
+})();
+</script>
+</body>
+</html>

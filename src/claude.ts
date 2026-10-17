@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process';
+import { spawnSync, execFile } from 'node:child_process';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
@@ -51,4 +51,12 @@ export function alwaysOnTokens(id: string): number | null {
   if (!m) return null;
   const n = parseFloat(m[1].replace(/,/g, ''));
   return Math.round(m[2] ? n * 1000 : n);
+}
+
+export function claudeAsync(args: string[]): Promise<{ ok: boolean; out: string }> {
+  const bad = args.find((a) => !SAFE_ARG.test(a));
+  if (bad !== undefined) return Promise.resolve({ ok: false, out: `Refusing unsafe argument: ${JSON.stringify(bad)}` });
+  return new Promise((resolve) =>
+    execFile('claude', args, { shell: process.platform === 'win32', encoding: 'utf8', maxBuffer: 8 << 20 }, (err, stdout, stderr) =>
+      resolve({ ok: !err, out: `${stdout ?? ''}${stderr ?? ''}`.trim() })));
 }

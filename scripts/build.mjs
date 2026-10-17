@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process';
 const local = join(homedir(), '.tailgate', 'catalog.json');
 if (existsSync(local) && !process.env.KEEP_SNAPSHOT) copyFileSync(local, 'src/snapshot.json');
 
+spawnSync('node', ['scripts/gen-page.mjs'], { stdio: 'inherit' });
 mkdirSync('dist', { recursive: true });
 const targets = process.argv[2] === 'all'
   ? [

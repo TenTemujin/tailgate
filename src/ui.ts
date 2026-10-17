@@ -4,8 +4,11 @@ import { scrape } from './github.js';
 import { install, pluginCmd, installedPlugins, alwaysOnTokens } from './claude.js';
 import { banner, bar, bold, cyan, dim, green, mag, red, stars, yellow, gradient } from './theme.js';
 import { maybeInstall } from './setup.js';
-import { available, selfUpdate, startup, updateAllPlugins } from './update.js';
+import { available, refreshCatalogIfStale, selfUpdate, startup, updateAllPlugins } from './update.js';
 import { VERSION } from './version.js';
+import { startGui } from './web.js';
+import { conflicts, listInstalled } from './core.js';
+import { apply, loadProfiles, plan } from './profiles.js';
 import type { Entry, Tier } from './types.js';
 
 const TIER: Record<Tier, (s: string) => string> = { S: mag, A: green, B: yellow };
@@ -125,6 +128,23 @@ async function updatePlugins() {
   p.log.info('Restart Claude Code to apply plugin updates.');
 }
 
+async function profiles(cat: Entry[]) {
+  const all = loadProfiles();
+  const pick = await p.select({
+    message: 'Profile',
+    options: [...all.map((x) => ({ value: x.name, label: x.name, hint: x.description })), { value: '__back', label: dim('← back') }],
+  });
+  if (p.isCancel(pick) || pick === '__back') return;
+  const prof = all.find((x) => x.name === pick)!;
+  const steps = plan(prof, cat, await listInstalled(cat));
+  if (!steps.length) return void p.log.success('Already matches this profile.');
+  p.note(steps.map((s) => `${s.action.padEnd(8)} ${s.plugin}  ${dim(s.reason)}`).join(String.fromCharCode(10)), `Plan for "${prof.name}"`);
+  const ok = await p.confirm({ message: 'Apply?' });
+  if (p.isCancel(ok) || !ok) return;
+  apply(steps, cat).forEach((r) => p.log[r.ok ? 'success' : 'error'](`${r.step.action} ${r.step.plugin}${r.ok ? '' : ': ' + r.out}`));
+  p.log.info('Restart Claude Code to apply.');
+}
+
 async function manage() {
   for (;;) {
     const list = installedPlugins();
@@ -134,6 +154,7 @@ async function manage() {
     const cost = new Map(list.map((x) => [x.id, alwaysOnTokens(x.id)]));
     const total = [...cost.values()].reduce<number>((a, b) => a + (b ?? 0), 0);
     sp.stop(`Always-on context from plugins: ${bold(total.toLocaleString())} tokens per session`);
+    conflicts(await listInstalled(load())).forEach((c) => p.log.warn(yellow(c.message)));
     const pick = await p.select({
       message: `Installed (${list.length})`,
       maxItems: 12,
@@ -166,6 +187,7 @@ export async function run() {
   console.log(banner());
   p.intro(gradient(' tailgate ') + dim(` v${VERSION}`));
   startup();
+  await refreshCatalogIfStale();
   if (!(await maybeInstall())) await offerUpdate();
   let list = load();
   if (!list.length) list = await refresh();
@@ -183,6 +205,8 @@ export async function run() {
         { value: 'all', label: '✦ Install from everything', hint: `${list.length} ranked` },
         { value: 'search', label: '🔎 Search', hint: 'filter by name or description' },
         { value: 'inspect', label: '📄 Inspect details' },
+        { value: 'profiles', label: '🎚 Profiles', hint: 'minimal · balanced · max-savings' },
+        { value: 'gui', label: '🖱 Open clickable interface', hint: 'browser, mouse friendly' },
         { value: 'manage', label: '⚙ Manage installed', hint: 'enable · disable · update · cost' },
         { value: 'refresh', label: '↻ Re-scrape catalog' },
         { value: 'selfupdate', label: '⬆ Check for Tailgate updates' },
@@ -191,6 +215,8 @@ export async function run() {
     });
     if (p.isCancel(a) || a === 'quit') break;
     if (a === 'refresh') list = await refresh();
+    else if (a === 'profiles') await profiles(list);
+    else if (a === 'gui') { await startGui(); break; }
     else if (a === 'selfupdate') await offerUpdate(true);
     else if (a === 'manage') await manage();
     else if (a === 'search') {

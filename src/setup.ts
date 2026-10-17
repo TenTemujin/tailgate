@@ -26,7 +26,7 @@ function addToPath() {
 
 function shortcut(where: 'Programs' | 'Desktop') {
   if (!win) return;
-  ps(`$s=(New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path ([Environment]::GetFolderPath('${where}')) 'Tailgate.lnk')); $s.TargetPath='${TARGET}'; $s.WorkingDirectory='${INSTALL_DIR}'; $s.Save()`);
+  ps(`$s=(New-Object -ComObject WScript.Shell).CreateShortcut((Join-Path ([Environment]::GetFolderPath('${where}')) 'Tailgate.lnk')); $s.TargetPath='${TARGET}'; $s.Arguments='gui'; $s.WorkingDirectory='${INSTALL_DIR}'; $s.Save()`);
 }
 
 export function installSelf() {

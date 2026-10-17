@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
-import { chmodSync, existsSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import type { Entry } from './types.js';
 import { join } from 'node:path';
 import { CATALOG, HOME, ensureHome } from './paths.js';
 import { REPO, VERSION } from './version.js';
@@ -104,4 +105,37 @@ export function updateAllPlugins(): PluginUpdate[] {
     const synced = !r.ok && /synced from/i.test(r.out); // account-managed plugins can't be updated locally
     return { id: p.id, ok: r.ok || synced, skipped: synced, out: r.out.split('\n').pop() ?? '' };
   });
+}
+
+// Weekly catalog published by .github/workflows/catalog.yml to the rolling `catalog-latest` release.
+export async function fetchRemoteCatalog(): Promise<Entry[] | null> {
+  try {
+    const t = token();
+    const h = { accept: 'application/vnd.github+json', ...(t ? { authorization: `Bearer ${t}` } : {}) };
+    const rel: any = await (await fetch(`https://api.github.com/repos/${REPO}/releases/tags/catalog-latest`, { headers: h, signal: AbortSignal.timeout(5000) })).json();
+    const asset = (rel.assets ?? []).find((a: any) => a.name === 'catalog.json');
+    if (!asset) return null;
+    const res = await fetch(t ? asset.url : asset.browser_download_url, {
+      headers: t ? { authorization: `Bearer ${t}`, accept: 'application/octet-stream' } : {},
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) return null;
+    const list = (await res.json()) as Entry[];
+    if (!Array.isArray(list) || !list.length || typeof list[0].id !== 'string') return null;
+    ensureHome();
+    writeFileSync(CATALOG, JSON.stringify(list, null, 2));
+    return list;
+  } catch {
+    return null;
+  }
+}
+
+// Silent weekly refresh at startup; never blocks or fails the app.
+export async function refreshCatalogIfStale(maxAgeDays = 7): Promise<boolean> {
+  try {
+    if (existsSync(CATALOG) && Date.now() - statSync(CATALOG).mtimeMs < maxAgeDays * 864e5) return false;
+    return (await fetchRemoteCatalog()) !== null;
+  } catch {
+    return false;
+  }
 }
