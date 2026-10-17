@@ -18,6 +18,9 @@ tailgate install <owner/repo...>      install from the catalog
 tailgate scrape [--json]              refresh catalog, print audit report
 tailgate report                       last scrape report (JSON)
 tailgate rejects [-r <reason>]        why repos were filtered out (JSONL)
+tailgate update [--check]             update Tailgate itself from GitHub Releases
+tailgate update-plugins               update every installed plugin
+tailgate details <plugin@market>      always-on token cost of a plugin
 tailgate self-uninstall               remove Tailgate
 ```
 

@@ -8,6 +8,8 @@ import { REJECTS } from './paths.js';
 import { bar, bold, dim, green, stars } from './theme.js';
 import { run } from './ui.js';
 import { isCompiled, uninstallSelf } from './setup.js';
+import { available, selfUpdate, startup, updateAllPlugins } from './update.js';
+import { VERSION } from './version.js';
 
 const program = new Command('tailgate').description('Skills & plugins manager for Claude Code, focused on token savings');
 
@@ -22,6 +24,21 @@ program.command('ui', { isDefault: true }).description('interactive TUI').action
   await run();
   await pauseOnExit();
 });
+
+program.command('update').description('update Tailgate itself (--check only reports)')
+  .option('--check', 'only report whether an update exists')
+  .action(async (o) => {
+    startup();
+    const r = await available(true);
+    if (!r) return console.log(`Up to date (v${VERSION}).`);
+    console.log(`v${r.version} available (current v${VERSION}).`);
+    if (o.check) return;
+    await selfUpdate(r);
+    console.log(green(`Updated to v${r.version}.`));
+  });
+
+program.command('update-plugins').description('update every installed Claude Code plugin').action(() =>
+  updateAllPlugins().forEach((x) => console.log(`${x.skipped ? 'skip  ' : x.ok ? 'ok    ' : 'FAILED'} ${x.id}  ${x.out}`)));
 
 program.command('self-uninstall').description('remove Tailgate (PATH, shortcuts, binary)').action(uninstallSelf);
 
@@ -64,8 +81,9 @@ program.command('install <repo...>').description('install one or more catalog en
 });
 
 program.command('installed').action(() => console.log(installed()));
+// `update` is Tailgate itself; a single plugin is `plugin-update`.
 for (const v of ['enable', 'disable', 'update', 'uninstall', 'details'] as const)
-  program.command(`${v} <plugin>`).action((n) => {
+  program.command(v === 'update' ? 'plugin-update <plugin>' : `${v} <plugin>`).action((n) => {
     const r = pluginCmd(v, n);
     console.log(r.out);
     process.exitCode = r.ok ? 0 : 1;

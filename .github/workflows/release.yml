@@ -14,6 +14,9 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - run: npm ci
+      - name: Stamp version from tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: sed -i "s/VERSION = '.*'/VERSION = '${GITHUB_REF_NAME#v}'/" src/version.ts
       - run: npx tsc --noEmit
       - name: Fresh catalog snapshot
         run: (npx tsx src/cli.ts scrape --json > /dev/null && cp ~/.tailgate/catalog.json src/snapshot.json) || echo "scrape failed, keeping committed snapshot"

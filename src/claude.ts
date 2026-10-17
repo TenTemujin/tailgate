@@ -4,7 +4,12 @@ import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import type { Entry } from './types.js';
 
+// On Windows `claude` is a .cmd shim and needs a shell, so reject anything that could inject shell syntax.
+const SAFE_ARG = /^[A-Za-z0-9_.@:\/\\=-]+$/;
+
 export function claude(args: string[], inherit = false) {
+  const bad = args.find((a) => !SAFE_ARG.test(a));
+  if (bad !== undefined) return { ok: false, out: `Refusing unsafe argument: ${JSON.stringify(bad)}` };
   const r = spawnSync('claude', args, { encoding: 'utf8', shell: process.platform === 'win32', stdio: inherit ? 'inherit' : 'pipe' });
   return { ok: r.status === 0, out: `${r.stdout ?? ''}${r.stderr ?? ''}`.trim() };
 }
@@ -39,3 +44,11 @@ export function install(e: Entry) {
 
 export const pluginCmd = (verb: 'enable' | 'disable' | 'uninstall' | 'update' | 'details', name: string) =>
   claude(['plugin', verb, name]);
+
+// Always-on context cost (tokens added to every session), parsed from `claude plugin details`.
+export function alwaysOnTokens(id: string): number | null {
+  const m = claude(['plugin', 'details', id]).out.match(/Always-on:\s*~?([\d,.]+)\s*(k?)\s*tok/i);
+  if (!m) return null;
+  const n = parseFloat(m[1].replace(/,/g, ''));
+  return Math.round(m[2] ? n * 1000 : n);
+}
