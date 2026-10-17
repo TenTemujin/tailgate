@@ -13,7 +13,8 @@ spawnSync('node', ['scripts/gen-page.mjs'], { stdio: 'inherit' });
 mkdirSync('dist', { recursive: true });
 const targets = process.argv[2] === 'all'
   ? [
-      ['bun-windows-x64', 'tailgate-windows-x64.exe'],
+      // Bun can only embed the icon and version info when running on Windows, so other hosts skip this target.
+      ...(process.platform === 'win32' ? [['bun-windows-x64', 'tailgate-windows-x64.exe']] : []),
       ['bun-linux-x64', 'tailgate-linux-x64'],
       ['bun-darwin-arm64', 'tailgate-macos-arm64'],
       ['bun-darwin-x64', 'tailgate-macos-x64'],

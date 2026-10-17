@@ -3,15 +3,15 @@ on:
   push:
     tags: ['v*']
   workflow_dispatch:
+
 jobs:
-  build:
+  # Linux and macOS binaries. The Windows exe is built on Windows below, because Bun can only set
+  # the icon and version resources when it runs on Windows.
+  unix:
     runs-on: ubuntu-latest
     permissions: { contents: write }
-    # The signing step's `if` can only read job-level env, so the secrets live here.
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      WINDOWS_CERT_PFX_BASE64: ${{ secrets.WINDOWS_CERT_PFX_BASE64 }}
-      WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -26,28 +26,21 @@ jobs:
       - name: Fresh catalog snapshot
         run: (npx tsx src/cli.ts scrape --audit --json > /dev/null && cp ~/.tailgate/catalog.json src/snapshot.json) || echo "scrape failed, keeping committed snapshot"
       - run: KEEP_SNAPSHOT=1 node scripts/build.mjs all
-      # Optional Authenticode signing. Runs only when the certificate secrets exist.
-      # Secrets: WINDOWS_CERT_PFX_BASE64 (base64 of the .pfx) and WINDOWS_CERT_PASSWORD.
-      - name: Sign Windows exe
-        if: env.WINDOWS_CERT_PFX_BASE64 != ''
-        run: |
-          sudo apt-get install -y osslsigncode
-          echo "$WINDOWS_CERT_PFX_BASE64" | base64 -d > cert.pfx
-          osslsigncode sign -pkcs12 cert.pfx -pass "$WINDOWS_CERT_PASSWORD" -n Tailgate -h sha256 \
-            -t http://timestamp.digicert.com -in dist/tailgate-windows-x64.exe -out dist/signed.exe
-          osslsigncode verify -in dist/signed.exe
-          mv dist/signed.exe dist/tailgate-windows-x64.exe
-          rm -f cert.pfx
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with: { files: 'dist/tailgate-*' }
 
-  # Windows desktop app: the Tailgate binary inside an Electron window, packaged as an installer.
-  desktop:
+  # Windows: the single-file exe (with icon and version info) and the desktop installer.
+  windows:
     runs-on: windows-latest
     permissions: { contents: write }
+    # The signing step's `if` can only read job-level env, so the secrets live here.
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      WINDOWS_CERT_PFX_BASE64: ${{ secrets.WINDOWS_CERT_PFX_BASE64 }}
+      WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+      CSC_LINK: ${{ secrets.WINDOWS_CERT_PFX_BASE64 }}
+      CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -62,7 +55,25 @@ jobs:
         run: sed -i "s/VERSION = '.*'/VERSION = '${GITHUB_REF_NAME#v}'/" src/version.ts
       - run: KEEP_SNAPSHOT=1 node scripts/build.mjs
         shell: bash
+      # Optional Authenticode signing of the single-file exe. Runs only when the certificate secrets exist.
+      # Secrets: WINDOWS_CERT_PFX_BASE64 (the .pfx, base64) and WINDOWS_CERT_PASSWORD.
+      - name: Sign the exe
+        if: env.WINDOWS_CERT_PFX_BASE64 != ''
+        shell: pwsh
+        run: |
+          [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\cert.pfx", [Convert]::FromBase64String($env:WINDOWS_CERT_PFX_BASE64))
+          $signtool = (Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Sort-Object FullName -Descending | Select-Object -First 1).FullName
+          & $signtool sign /f "$env:RUNNER_TEMP\cert.pfx" /p $env:WINDOWS_CERT_PASSWORD /fd sha256 /tr http://timestamp.digicert.com /td sha256 dist\tailgate.exe
+          & $signtool verify /pa dist\tailgate.exe
+          Remove-Item "$env:RUNNER_TEMP\cert.pfx"
+      # build-desktop.mjs passes --publish never: electron-builder otherwise sees GITHUB_TOKEN and tries to publish itself.
       - run: node scripts/build-desktop.mjs --skip-binary
+      - name: Name the release files
+        shell: bash
+        run: cp dist/tailgate.exe dist/tailgate-windows-x64.exe
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
-        with: { files: 'desktop/out/Tailgate-Setup-*.exe' }
+        with:
+          files: |
+            dist/tailgate-windows-x64.exe
+            desktop/out/Tailgate-Setup-*.exe

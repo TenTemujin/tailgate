@@ -26,5 +26,5 @@ const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
 pkg.version = version;
 writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
 
-run('npx', ['electron-builder', '--win', '--x64'], 'desktop');
+run('npx', ['electron-builder', '--win', '--x64', '--publish', 'never'], 'desktop');
 console.log(`\nInstaller: desktop/out/Tailgate-Setup-${version}.exe`);
