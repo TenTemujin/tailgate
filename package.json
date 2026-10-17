@@ -1,0 +1,30 @@
+{
+  "name": "tailgate",
+  "version": "0.1.0",
+  "description": "Package manager for Claude Code skills and plugins, focused on token savings",
+  "type": "module",
+  "bin": {
+    "tailgate": "dist/cli.js"
+  },
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "package": "node scripts/build.mjs",
+    "package:all": "node scripts/build.mjs all"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@clack/prompts": "^1.8.1",
+    "commander": "^15.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
