@@ -47,10 +47,15 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Tailgate",
       "deleteAppDataOnUninstall": false
-    }
+    },
+    "publish": null
   },
   "devDependencies": {
     "electron": "^44.9.0",
     "electron-builder": "^26.15.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TenTemujin/tailgate.git"
   }
 }
