@@ -2,7 +2,7 @@
   {
     "id": "thedotmack/claude-mem",
     "description": "Persistent Context Across Sessions for Every Agent –  Captures everything your agent does during sessions, compresses it with AI, and injects relevant context back into future sessions. Works with Claude Code, OpenClaw, Codex, Gemini, Hermes, Copilot, OpenCode + More",
-    "stars": 101404,
+    "stars": 101406,
     "pushedAt": "2026-10-17T19:32:04Z",
     "license": "Apache-2.0",
     "kind": "marketplace",
@@ -20,7 +20,7 @@
   {
     "id": "JuliusBrussee/caveman",
     "description": "🪨 why use many token when few token do trick. Viral skill + proxy for coding agents that cuts 65% of tokens by talking like a caveman.",
-    "stars": 113275,
+    "stars": 113278,
     "pushedAt": "2026-10-17T21:09:51Z",
     "license": "Apache-2.0",
     "kind": "marketplace",
@@ -37,7 +37,7 @@
   {
     "id": "rtk-ai/rtk",
     "description": "CLI proxy that reduces LLM token consumption by 60-90% on common dev commands. Single Rust binary, zero dependencies",
-    "stars": 83750,
+    "stars": 83753,
     "pushedAt": "2026-10-17T13:25:07Z",
     "license": "Apache-2.0",
     "kind": "unknown",
@@ -50,7 +50,7 @@
   {
     "id": "headroomlabs-ai/headroom",
     "description": "Compress tool outputs, logs, files, and RAG chunks before they reach the LLM. 20% fewer tokens for coding agents, 60-95% fewer tokens for JSON, same answers. Library, proxy, MCP server.",
-    "stars": 75585,
+    "stars": 75586,
     "pushedAt": "2026-10-17T18:29:50Z",
     "license": "Apache-2.0",
     "kind": "marketplace",
@@ -68,8 +68,8 @@
   {
     "id": "mksglu/context-mode",
     "description": "Context window optimization for AI coding agents. Sandboxes tool output (98% reduction), persists session memory, and   enforces routing across 17 platforms via MCP + hooks.",
-    "stars": 30496,
-    "pushedAt": "2026-10-17T21:55:01Z",
+    "stars": 30500,
+    "pushedAt": "2026-10-17T22:23:14Z",
     "license": "NOASSERTION",
     "kind": "marketplace",
     "category": "token-saver",
@@ -85,7 +85,7 @@
   {
     "id": "OthmanAdi/planning-with-files",
     "description": "Persistent file-based planning for AI coding agents and long-running tasks. Crash-proof markdown plans, session recovery after /clear and compaction, per-turn re-injection against context rot, deterministic completion gate. Manus-style. Install from npm, the Claude Code plugin marketplace, or npx skills. Codex, Cursor, OpenCode, 60+ agents.",
-    "stars": 27492,
+    "stars": 27493,
     "pushedAt": "2026-10-17T21:51:12Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -102,7 +102,7 @@
   {
     "id": "affaan-m/ECC",
     "description": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
-    "stars": 282398,
+    "stars": 282419,
     "pushedAt": "2026-10-15T19:17:01Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -119,7 +119,7 @@
   {
     "id": "nidhinjs/prompt-master",
     "description": "A Claude skill that writes the accurate prompts for any AI tool. Zero tokens or credits wasted. Full context and memory retention",
-    "stars": 14552,
+    "stars": 14553,
     "pushedAt": "2026-10-16T07:24:11Z",
     "license": "MIT",
     "kind": "skill",
@@ -162,7 +162,7 @@
   {
     "id": "coreyhaines31/marketingskills",
     "description": "Marketing skills for Claude Code and AI agents. CRO, copywriting, SEO, analytics, and growth engineering.",
-    "stars": 55248,
+    "stars": 55250,
     "pushedAt": "2026-10-15T21:33:21Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -231,7 +231,7 @@
     "id": "kitfunso/hippo-memory",
     "description": "Stop re-teaching your agent. Make your agent's memory work like a brain. Hippo is long-term memory for coding agents. It's a critical layer for your AI harness that connects across your different tools (Cursor, Claude Code, Codex). It keeps your proprietary data completely local, and it actually learns over time.",
     "stars": 781,
-    "pushedAt": "2026-10-17T21:49:23Z",
+    "pushedAt": "2026-10-17T22:16:23Z",
     "license": "MIT",
     "kind": "marketplace",
     "category": "memory",
@@ -282,7 +282,7 @@
     "id": "ooples/token-optimizer-mcp",
     "description": "Measure token savings per AI coding agent, optimize context, and share a live local knowledge graph across 16 CLI clients.",
     "stars": 551,
-    "pushedAt": "2026-10-17T17:59:37Z",
+    "pushedAt": "2026-10-17T22:18:56Z",
     "license": "MIT",
     "kind": "marketplace",
     "category": "token-saver",
@@ -315,7 +315,7 @@
   {
     "id": "Egonex-AI/Understand-Anything",
     "description": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
-    "stars": 86788,
+    "stars": 86790,
     "pushedAt": "2026-10-12T10:24:59Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -332,7 +332,7 @@
   {
     "id": "activeing123/mcptoon",
     "description": "One zero-dependency CLI for every MCP server and agent skill. Token optimization, tool discovery and context compression: 71,929 -> 581 tokens (-99.2%, measured), schemas stay out of context. One config for Claude Code, Codex, Cursor, every agent. 341KB, pure Python. | 零依赖 CLI：管所有 MCP 工具与技能，工具发现省 99.2% token。",
-    "stars": 261,
+    "stars": 264,
     "pushedAt": "2026-10-17T10:45:03Z",
     "license": "Apache-2.0",
     "kind": "marketplace",
@@ -451,7 +451,7 @@
   {
     "id": "tigerless-labs/autoharness",
     "description": "Autoharness — a self-learning skill layer for Claude Code — distills skills from your real sessions, updates them as you work, and prunes the ones that stop getting used. No daemon, no benchmark.",
-    "stars": 11132,
+    "stars": 11133,
     "pushedAt": "2026-10-15T16:22:50Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -485,7 +485,7 @@
   {
     "id": "Ryze-AI-Adgent/open-seo-mcp-skills",
     "description": "Free SEO MCP server + open-source SEO and GEO skills for Claude: keyword research, rank tracking, audits, backlinks, AI visibility on your real GSC/GA4/ads data. claude mcp add ryze --transport http https://connector.get-ryze.ai/mcp",
-    "stars": 5949,
+    "stars": 5951,
     "pushedAt": "2026-10-13T03:37:44Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -502,7 +502,7 @@
   {
     "id": "Graphify-Labs/graphify",
     "description": "Turn any codebase, with its docs, SQL schemas, configs, and PDFs, into a queryable knowledge graph. A /graphify skill for Claude Code, Cursor, Codex, and Gemini CLI: local deterministic AST parsing, every edge explained, no vector store.",
-    "stars": 127745,
+    "stars": 127752,
     "pushedAt": "2026-10-16T17:57:21Z",
     "license": "Apache-2.0",
     "kind": "unknown",
@@ -532,7 +532,7 @@
   {
     "id": "mvanhorn/last30days-skill",
     "description": "AI agent skill that researches any topic across Reddit, X, YouTube, HN, Polymarket, and the web - then synthesizes a grounded summary",
-    "stars": 64584,
+    "stars": 64585,
     "pushedAt": "2026-10-16T00:36:18Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -549,7 +549,7 @@
   {
     "id": "feder-cr/invisible_playwright_mcp",
     "description": "Playwright MCP server undetected by anti-bots and captchas: AI agent browses the web on anti-detect stealth Firefox, Python, undetected browser automation, scraping, computer use.",
-    "stars": 2764,
+    "stars": 2765,
     "pushedAt": "2026-10-17T17:43:40Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -561,6 +561,23 @@
       "invisible-playwright-mcp"
     ],
     "score": 60,
+    "tier": "B"
+  },
+  {
+    "id": "TenTemujin/delegate",
+    "description": "Claude Code plugin: Antigravity CLI (agy, Gemini) as a helper that saves Claude tokens and extends what Claude can do; Claude stays in charge. Claude proactively offloads bulk reading, boilerplate, mechanical edits, web search, image and long-context tasks to agy, then reviews everything",
+    "stars": 2,
+    "pushedAt": "2026-10-16T00:03:21Z",
+    "license": "MIT",
+    "kind": "marketplace",
+    "category": "token-saver",
+    "tokenSaver": true,
+    "curated": true,
+    "marketplaceName": "agy-delegate-marketplace",
+    "plugins": [
+      "agy-delegate"
+    ],
+    "score": 59,
     "tier": "B"
   },
   {
@@ -659,7 +676,7 @@
   {
     "id": "DietrichGebert/ponytail",
     "description": "Makes your AI agent think like the laziest senior dev in the room. The best code is the code you never wrote.",
-    "stars": 166164,
+    "stars": 166183,
     "pushedAt": "2026-10-16T23:04:42Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -676,7 +693,7 @@
   {
     "id": "addyosmani/agent-skills",
     "description": "Production-grade engineering skills for AI coding agents.",
-    "stars": 107813,
+    "stars": 107818,
     "pushedAt": "2026-10-13T20:24:07Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -693,7 +710,7 @@
   {
     "id": "Leonxlnx/taste-skill",
     "description": "Agent skills that give coding agents taste: art direction, reference images and a browser check instead of generic AI pages",
-    "stars": 98427,
+    "stars": 98431,
     "pushedAt": "2026-10-14T15:00:56Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -710,7 +727,7 @@
   {
     "id": "career-ops-hq/career-ops",
     "description": "Open-source AI job search agent and job finder: scan job boards, score each job 1-5 against your CV before you apply, tailor an ATS-friendly resume and cover letter, get interview prep and a job application tracker. It helps you fill in each application; you press Submit. Runs locally in your AI coding CLI (Claude Code, Codex, OpenCode and more).",
-    "stars": 75355,
+    "stars": 75357,
     "pushedAt": "2026-10-17T20:42:55Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -727,7 +744,7 @@
   {
     "id": "ayghri/i-have-adhd",
     "description": "A skill to stop your coding agent from burying the answer. ADHD-friendly output.",
-    "stars": 57545,
+    "stars": 57547,
     "pushedAt": "2026-10-11T16:03:54Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -791,7 +808,7 @@
   {
     "id": "blader/humanizer",
     "description": "Agent skill that removes signs of AI-generated writing from text",
-    "stars": 57817,
+    "stars": 57823,
     "pushedAt": "2026-10-16T19:12:03Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -808,7 +825,7 @@
   {
     "id": "cathrynlavery/diagram-design",
     "description": "Editorial diagram design for Claude Code, Codex, GitHub Copilot, Cursor, Factory Droid, and Pi. 44 diagram types. Self-contained HTML + SVG. No shadows. No Mermaid slop.",
-    "stars": 56956,
+    "stars": 56965,
     "pushedAt": "2026-10-16T19:42:46Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -825,7 +842,7 @@
   {
     "id": "wshobson/agents",
     "description": "Multi-harness agentic plugin marketplace for Claude Code, Codex, Cursor, OpenCode, GitHub Copilot, Google Antigravity, and Pi",
-    "stars": 40970,
+    "stars": 40971,
     "pushedAt": "2026-10-17T21:39:17Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -935,7 +952,7 @@
   {
     "id": "Yeachan-Heo/oh-my-claudecode",
     "description": "Teams-first Multi-agent orchestration for Claude Code",
-    "stars": 40003,
+    "stars": 40004,
     "pushedAt": "2026-10-17T14:08:56Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -994,7 +1011,7 @@
   {
     "id": "latent-spaces/brag",
     "description": "You built it. Now brag. Turn the project you just created into a short, shareable launch video with one command.",
-    "stars": 16488,
+    "stars": 16494,
     "pushedAt": "2026-10-13T11:08:09Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -1050,7 +1067,7 @@
   {
     "id": "Jeffallan/claude-skills",
     "description": "67 Specialized Skills for Full-Stack Developers. Transform Claude Code into your expert pair programmer.",
-    "stars": 11916,
+    "stars": 11917,
     "pushedAt": "2026-10-16T16:29:21Z",
     "license": "MIT",
     "kind": "marketplace",
@@ -1067,7 +1084,7 @@
   {
     "id": "iOfficeAI/OfficeCLI",
     "description": "OfficeCLI is the first and best Office suite  purpose-built for AI agents to read, edit, and automate Word, Excel, and PowerPoint files. Free, open-source, single binary, no Office installation required.",
-    "stars": 32111,
+    "stars": 32112,
     "pushedAt": "2026-10-13T02:29:44Z",
     "license": "Apache-2.0",
     "kind": "skill",

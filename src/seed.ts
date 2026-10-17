@@ -4,4 +4,5 @@ export const SEED = [
   'thedotmack/claude-mem',
   'rtk-ai/rtk',
   'Graphify-Labs/graphify',
+  'TenTemujin/delegate',
 ];
