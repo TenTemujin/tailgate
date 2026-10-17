@@ -7,7 +7,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions: { contents: write }
-    env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+    # The signing step's `if` can only read job-level env, so the secrets live here.
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      WINDOWS_CERT_PFX_BASE64: ${{ secrets.WINDOWS_CERT_PFX_BASE64 }}
+      WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -18,16 +22,14 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         run: sed -i "s/VERSION = '.*'/VERSION = '${GITHUB_REF_NAME#v}'/" src/version.ts
       - run: npx tsc --noEmit
+      - run: npm test
       - name: Fresh catalog snapshot
-        run: (npx tsx src/cli.ts scrape --json > /dev/null && cp ~/.tailgate/catalog.json src/snapshot.json) || echo "scrape failed, keeping committed snapshot"
+        run: (npx tsx src/cli.ts scrape --audit --json > /dev/null && cp ~/.tailgate/catalog.json src/snapshot.json) || echo "scrape failed, keeping committed snapshot"
       - run: KEEP_SNAPSHOT=1 node scripts/build.mjs all
       # Optional Authenticode signing. Runs only when the certificate secrets exist.
       # Secrets: WINDOWS_CERT_PFX_BASE64 (base64 of the .pfx) and WINDOWS_CERT_PASSWORD.
       - name: Sign Windows exe
         if: env.WINDOWS_CERT_PFX_BASE64 != ''
-        env:
-          WINDOWS_CERT_PFX_BASE64: ${{ secrets.WINDOWS_CERT_PFX_BASE64 }}
-          WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
         run: |
           sudo apt-get install -y osslsigncode
           echo "$WINDOWS_CERT_PFX_BASE64" | base64 -d > cert.pfx
@@ -39,3 +41,28 @@ jobs:
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with: { files: 'dist/tailgate-*' }
+
+  # Windows desktop app: the Tailgate binary inside an Electron window, packaged as an installer.
+  desktop:
+    runs-on: windows-latest
+    permissions: { contents: write }
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npm ci
+        working-directory: desktop
+      - name: Stamp version from tag
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: sed -i "s/VERSION = '.*'/VERSION = '${GITHUB_REF_NAME#v}'/" src/version.ts
+      - run: KEEP_SNAPSHOT=1 node scripts/build.mjs
+        shell: bash
+      - run: node scripts/build-desktop.mjs --skip-binary
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with: { files: 'desktop/out/Tailgate-Setup-*.exe' }

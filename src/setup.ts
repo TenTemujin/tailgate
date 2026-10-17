@@ -4,6 +4,7 @@ import { basename, dirname, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import * as p from '@clack/prompts';
 import { green, dim } from './theme.js';
+import { setAutostart, startTray } from './tray.js';
 
 const win = process.platform === 'win32';
 const exeName = win ? 'tailgate.exe' : 'tailgate';
@@ -55,6 +56,13 @@ export async function maybeInstall(): Promise<boolean> {
   });
   if (p.isCancel(yes) || !yes) return false;
   installSelf();
+  if (win) {
+    const tray = await p.confirm({ message: 'Show the odometer (tokens saved) in the taskbar and start it with Windows?', initialValue: true });
+    if (!p.isCancel(tray) && tray) {
+      setAutostart(TARGET, true);
+      startTray(TARGET);
+    }
+  }
   p.log.success(`Installed. Open ${green('Tailgate')} from the Desktop or type ${green('tailgate')} in any terminal.`);
   return true;
 }

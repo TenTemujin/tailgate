@@ -5,16 +5,18 @@ import { existsSync } from 'node:fs';
 import type { Entry } from './types.js';
 
 // On Windows `claude` is a .cmd shim and needs a shell, so reject anything that could inject shell syntax.
-const SAFE_ARG = /^[A-Za-z0-9_.@:\/\\=-]+$/;
+// Spaces are allowed (folder names) and get quoted below; quotes, & | < > ^ % ! ; and friends never pass.
+export const SAFE_ARG = /^[A-Za-z0-9_.@:\/\\= -]+$/;
+export const shellQuote = (a: string) => (process.platform === 'win32' && a.includes(' ') ? `"${a}"` : a);
 
 export function claude(args: string[], inherit = false) {
   const bad = args.find((a) => !SAFE_ARG.test(a));
   if (bad !== undefined) return { ok: false, out: `Refusing unsafe argument: ${JSON.stringify(bad)}` };
-  const r = spawnSync('claude', args, { encoding: 'utf8', shell: process.platform === 'win32', stdio: inherit ? 'inherit' : 'pipe' });
+  const r = spawnSync('claude', args.map(shellQuote), { encoding: 'utf8', shell: process.platform === 'win32', stdio: inherit ? 'inherit' : 'pipe' });
   return { ok: r.status === 0, out: `${r.stdout ?? ''}${r.stderr ?? ''}`.trim() };
 }
 
-export interface Installed { id: string; version: string; enabled: boolean; scope: string }
+export interface Installed { id: string; version: string; enabled: boolean; scope: string; installedAt?: string }
 
 export function installedPlugins(): Installed[] {
   const r = claude(['plugin', 'list', '--json']);
@@ -57,6 +59,6 @@ export function claudeAsync(args: string[]): Promise<{ ok: boolean; out: string 
   const bad = args.find((a) => !SAFE_ARG.test(a));
   if (bad !== undefined) return Promise.resolve({ ok: false, out: `Refusing unsafe argument: ${JSON.stringify(bad)}` });
   return new Promise((resolve) =>
-    execFile('claude', args, { shell: process.platform === 'win32', encoding: 'utf8', maxBuffer: 8 << 20 }, (err, stdout, stderr) =>
+    execFile('claude', args.map(shellQuote), { shell: process.platform === 'win32', encoding: 'utf8', maxBuffer: 8 << 20 }, (err, stdout, stderr) =>
       resolve({ ok: !err, out: `${stdout ?? ''}${stderr ?? ''}`.trim() })));
 }

@@ -1,0 +1,45 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  # Build the real binary on each OS and run it, so Linux/macOS/Windows builds are proven to start.
+  smoke:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: KEEP_SNAPSHOT=1 node scripts/build.mjs
+        shell: bash
+      - name: Run the compiled binary
+        shell: bash
+        run: |
+          BIN=dist/tailgate; [ -f dist/tailgate.exe ] && BIN=dist/tailgate.exe
+          "$BIN" --version
+          "$BIN" list -n 3
+          "$BIN" profile list
+          "$BIN" delegate --json
+          "$BIN" stats --json
+          "$BIN" update --check || true
+          "$BIN" install not-a-repo || test $? -ne 0

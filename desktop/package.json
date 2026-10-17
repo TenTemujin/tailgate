@@ -1,0 +1,56 @@
+{
+  "name": "tailgate-desktop",
+  "productName": "Tailgate",
+  "version": "0.4.0",
+  "description": "Tailgate desktop app: a window around the Tailgate binary, so no browser is needed.",
+  "author": "Thiago Ferreira",
+  "license": "MIT",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.tenttemujin.tailgate",
+    "productName": "Tailgate",
+    "artifactName": "Tailgate-Setup-${version}.${ext}",
+    "directories": {
+      "output": "out"
+    },
+    "files": [
+      "main.js",
+      "icon.png",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "backend/",
+        "to": "."
+      }
+    ],
+    "win": {
+      "icon": "icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Tailgate",
+      "deleteAppDataOnUninstall": false
+    }
+  },
+  "devDependencies": {
+    "electron": "^44.9.0",
+    "electron-builder": "^26.15.3"
+  }
+}

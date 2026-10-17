@@ -3,10 +3,11 @@ import { CATALOG, REPORT, REJECTS, ensureHome } from './paths.js';
 import type { Entry } from './types.js';
 import type { ScrapeResult } from './github.js';
 import snapshot from './snapshot.json' with { type: 'json' };
+import { withTools } from './tools.js';
 
 export function load(): Entry[] {
   // Local scrape wins; otherwise the snapshot bundled at build time.
-  return existsSync(CATALOG) ? JSON.parse(readFileSync(CATALOG, 'utf8')) : (snapshot as Entry[]);
+  return withTools(existsSync(CATALOG) ? JSON.parse(readFileSync(CATALOG, 'utf8')) : (snapshot as Entry[]));
 }
 
 export function loadReport() {

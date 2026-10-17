@@ -4,7 +4,15 @@ import { spawn } from 'node:child_process';
 import page from './page.gen.js';
 import { load, save } from './catalog.js';
 import { scrape } from './github.js';
-import { install, installedPlugins, pluginCmd } from './claude.js';
+import { installedPlugins, pluginCmd } from './claude.js';
+import { installChecked, resolveTarget } from './installer.js';
+import { guideFor, isToolInstalled } from './guides.js';
+import { updateEverything } from './updater.js';
+import { delegateStats, savings } from './stats.js';
+import { impactFor, scanTranscripts } from './impact.js';
+import { applyProject, currentEnabled, planProject, clearPlan } from './project.js';
+import { existsSync, statSync } from 'node:fs';
+import { resolve as resolvePath } from 'node:path';
 import { conflicts, entryFor, isEntryInstalled, listInstalled } from './core.js';
 import { apply, loadProfiles, plan, saveProfile } from './profiles.js';
 import { available, fetchRemoteCatalog, selfUpdate, updateAllPlugins } from './update.js';
@@ -32,7 +40,7 @@ function send(res: ServerResponse, status: number, body: unknown, type = 'applic
     'content-type': `${type}; charset=utf-8`,
     'cache-control': 'no-store',
     'x-content-type-options': 'nosniff',
-    'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'",
+    'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'self'; base-uri 'none'; form-action 'none'",
   });
   res.end(typeof body === 'string' ? body : JSON.stringify(body));
 }
@@ -42,7 +50,7 @@ export function openBrowser(url: string) {
   try { spawn(cmd, args, { stdio: 'ignore', detached: true }).unref(); } catch { /* user can open the printed URL */ }
 }
 
-export async function startGui(open = true): Promise<void> {
+export async function startGui(open = true, tab?: string): Promise<void> {
   const token = randomBytes(24).toString('hex');
   let busy = 0;
   let lastPing = Date.now();
@@ -55,7 +63,12 @@ export async function startGui(open = true): Promise<void> {
     return {
       version: VERSION,
       update: upd ? { version: upd.version } : null,
-      catalog: catalog.map((e) => ({ ...e, installed: isEntryInstalled(e, ids) })),
+      catalog: catalog.map((e) => {
+        const g = guideFor(e.id);
+        const toolIn = !!g && (e.kind === 'tool' || e.kind === 'unknown') && isToolInstalled(g);
+        // Findings stay on disk and in the CLI; the page only needs the counts.
+        return { ...e, security: e.security && { ...e.security, findings: [] }, installed: isEntryInstalled(e, ids) || toolIn, guided: !!g, interactive: !!g?.interactive, manualUrl: g?.manual };
+      }),
       installed: rows.map(({ entry, ...r }) => r),
       totalTokens: rows.filter((r) => r.enabled).reduce((a, r) => a + (r.tokens ?? 0), 0),
       conflicts: conflicts(rows),
@@ -66,15 +79,23 @@ export async function startGui(open = true): Promise<void> {
   const route = async (method: string, path: string, req: IncomingMessage): Promise<unknown> => {
     if (path === 'ping') { lastPing = Date.now(); return { ok: true }; }
     if (path === 'state') return state();
+    if (path === 'savings') return savings();
+    if (path === 'delegate') return delegateStats();
+    if (path === 'impact') {
+      const rows = await listInstalled(catalog);
+      const sessions = await scanTranscripts(Date.now() - 120 * 864e5);
+      return { sessions: sessions.length, plugins: rows.map((r) => ({ plugin: r.id, ...impactFor(sessions, Date.parse(r.installedAt ?? '') || 0) })) };
+    }
     if (method !== 'POST') throw new HttpError(405, 'POST required');
     const body = await readJson(req);
 
     if (path === 'install') {
-      const e = catalog.find((x) => x.id === body.id);
-      if (!e) throw new HttpError(404, 'Not in catalog');
-      const r = install(e);
-      if (!r.ok) throw new HttpError(500, r.out.slice(0, 300));
-      return { ok: true };
+      const t = await resolveTarget(String(body.id ?? ''), catalog);
+      if ('error' in t) throw new HttpError(404, t.error);
+      const r = installChecked(t.entry, { force: body.force === true });
+      if (r.blocked) return { ok: false, blocked: true, message: r.out };
+      if (!r.ok) throw new HttpError(500, r.out.slice(0, 400));
+      return { ok: true, out: r.out.slice(0, 400) };
     }
     if (path === 'plugin') {
       if (!VERBS.has(body.verb)) throw new HttpError(400, 'Bad verb');
@@ -83,7 +104,7 @@ export async function startGui(open = true): Promise<void> {
       if (!r.ok) throw new HttpError(500, r.out.slice(0, 300));
       return { ok: true, out: r.out.split('\n').pop() };
     }
-    if (path === 'update-all') return { results: updateAllPlugins() };
+    if (path === 'update-all') return { results: updateEverything() };
     if (path === 'selfupdate') {
       const r = await available(true);
       if (!r) throw new HttpError(400, 'Already up to date');
@@ -105,7 +126,18 @@ export async function startGui(open = true): Promise<void> {
     if (path === 'profile-plan' || path === 'profile-apply') {
       const prof = loadProfiles().find((p) => p.name === body.name);
       if (!prof) throw new HttpError(404, 'Unknown profile');
-      const steps = plan(prof, catalog, await listInstalled(catalog));
+      const rows = await listInstalled(catalog);
+      if (body.dir) {
+        const dir = resolvePath(String(body.dir));
+        if (!existsSync(dir) || !statSync(dir).isDirectory()) throw new HttpError(400, 'Project folder does not exist');
+        const cur = currentEnabled(dir);
+        const changes = body.clear ? clearPlan(rows, cur) : planProject(prof, rows, cur);
+        const steps = changes.map((c) => ({ action: c.to === undefined ? 'unset' : c.to ? 'enable' : 'disable', repo: '', plugin: c.plugin, reason: `in ${dir}` }));
+        if (path === 'profile-plan') return { steps };
+        applyProject(dir, changes);
+        return { results: steps.map((s) => ({ step: s, ok: true, out: '' })) };
+      }
+      const steps = plan(prof, catalog, rows);
       return path === 'profile-plan' ? { steps } : { results: apply(steps, catalog) };
     }
     if (path === 'profile-save') {
@@ -142,7 +174,7 @@ export async function startGui(open = true): Promise<void> {
 
   await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
   const { port } = server.address() as { port: number };
-  const url = `http://127.0.0.1:${port}/?t=${token}`;
+  const url = `http://127.0.0.1:${port}/?t=${token}${tab && /^[a-z]+$/.test(tab) ? `&tab=${tab}` : ''}`;
   console.log(`Tailgate is running at ${url}\nClose the browser tab (or press Ctrl+C) to stop.`);
   if (open) openBrowser(url);
 

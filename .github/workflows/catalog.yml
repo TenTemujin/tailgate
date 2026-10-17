@@ -19,7 +19,7 @@ jobs:
         with: { node-version: 22 }
       - run: npm ci
       - name: Scrape
-        run: npx tsx src/cli.ts scrape --json > report.json
+        run: npx tsx src/cli.ts scrape --audit --json > report.json
       - name: Sanity check (never publish an empty or tiny catalog)
         run: node -e "const c=require(process.env.HOME+'/.tailgate/catalog.json'); if(!Array.isArray(c)||c.length<20){console.error('catalog too small:',c.length);process.exit(1)}"
       - name: Publish

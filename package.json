@@ -11,7 +11,9 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "package": "node scripts/build.mjs",
-    "package:all": "node scripts/build.mjs all"
+    "package:all": "node scripts/build.mjs all",
+    "test": "tsx --test tests/*.test.ts",
+    "desktop": "node scripts/build-desktop.mjs"
   },
   "engines": {
     "node": ">=20"
@@ -24,6 +26,7 @@
   "devDependencies": {
     "@types/node": "^26.6.5",
     "esbuild": "^0.28.2",
+    "sharp": "^0.35.5",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }
